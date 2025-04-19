@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { format, parse, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 import { 
@@ -234,7 +233,13 @@ const EntriesPage = () => {
                         <TableCell>{entry.quantity}</TableCell>
                         <TableCell>{entry.rate}</TableCell>
                         <TableCell>{formatCurrency(entry.quantity * entry.rate)}</TableCell>
-                        <TableCell>{vendors[entry.vendorId]?.name || "Unknown"}</TableCell>
+                        <TableCell>
+                          {vendors[entry.vendorId]?.name || (
+                            <span className="text-yellow-600 text-sm">
+                              Please select a vendor
+                            </span>
+                          )}
+                        </TableCell>
                         <TableCell>
                           <span
                             className={cn(

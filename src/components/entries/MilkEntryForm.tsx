@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -78,8 +77,8 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
     defaultValues: {
       date: new Date(),
       quantity: 1,
-      rate: 50,
-      vendorId: "",
+      rate: defaultRate,
+      vendorId: defaultVendorId,
       isPaid: false,
       notes: "",
     },
@@ -96,21 +95,20 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
       const monthYearString = getMonthYearString(today);
       const settings = getMonthlySettingByMonth(monthYearString);
 
-      // Store defaults for future resets
       if (settings) {
         setDefaultRate(settings.defaultRate);
         setDefaultVendorId(settings.defaultVendorId);
+        
+        // Initialize form with default values from settings
+        form.reset({
+          date: new Date(),
+          quantity: 1,
+          rate: settings.defaultRate,
+          vendorId: settings.defaultVendorId,
+          isPaid: false,
+          notes: "",
+        });
       }
-
-      // Initialize form with defaults or existing entry
-      form.reset({
-        date: new Date(),
-        quantity: 1,
-        rate: settings?.defaultRate || 50,
-        vendorId: settings?.defaultVendorId || "",
-        isPaid: false,
-        notes: "",
-      });
     } else {
       // For existing entry
       form.reset({
