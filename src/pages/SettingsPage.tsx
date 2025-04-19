@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Download, Upload } from "lucide-react";
+import { Download, Upload, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -73,50 +73,58 @@ const SettingsPage = () => {
 
   return (
     <div className="p-4 pb-20 animate-fade-in">
-      <h1 className="text-2xl font-bold mb-4">Settings</h1>
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold flex items-center">
+          <SettingsIcon className="mr-2 h-6 w-6 text-milk-600" />
+          Settings
+        </h1>
+      </div>
       
       {/* Monthly Settings */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Monthly Defaults</CardTitle>
+      <Card className="mb-6 shadow-sm border-milk-100 overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-milk-50 to-green-50 pb-4">
+          <CardTitle className="text-milk-800">Monthly Defaults</CardTitle>
           <CardDescription>
             Set the default values for milk entries this month.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-5">
           <MonthlySettingsForm />
         </CardContent>
       </Card>
       
       {/* Data Management */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Data Management</CardTitle>
+      <Card className="shadow-sm border-milk-100 overflow-hidden">
+        <CardHeader className="bg-gradient-to-r from-milk-50 to-green-50 pb-4">
+          <CardTitle className="text-milk-800">Data Management</CardTitle>
           <CardDescription>
             Export or import your milk tracking data.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="text-sm font-medium mb-2">Export Data</h3>
-            <p className="text-sm text-gray-500 mb-3">
+        <CardContent className="space-y-4 p-5">
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h3 className="text-sm font-medium mb-2 text-milk-800">Export Data</h3>
+            <p className="text-sm text-gray-600 mb-3">
               Export all your data as a JSON file for backup or transfer to another device.
             </p>
-            <Button onClick={handleExportData} className="w-full sm:w-auto">
+            <Button 
+              onClick={handleExportData} 
+              className="w-full sm:w-auto bg-milk-500 hover:bg-milk-600 shadow-sm"
+            >
               <Download className="mr-2 h-4 w-4" />
               Export Data
             </Button>
           </div>
           
-          <div className="pt-4 border-t">
-            <h3 className="text-sm font-medium mb-2">Import Data</h3>
-            <p className="text-sm text-gray-500 mb-3">
+          <div className="bg-blue-50 p-4 rounded-lg border-t">
+            <h3 className="text-sm font-medium mb-2 text-blue-800">Import Data</h3>
+            <p className="text-sm text-gray-600 mb-3">
               Import previously exported data. This will replace all current data.
             </p>
             <Button 
               onClick={() => setShowImportDialog(true)}
               variant="outline" 
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto border-blue-200 text-blue-700 hover:bg-blue-100 shadow-sm"
             >
               <Upload className="mr-2 h-4 w-4" />
               Import Data
@@ -135,7 +143,7 @@ const SettingsPage = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <div className="border-2 border-dashed border-milk-200 bg-milk-50 rounded-lg p-6 text-center">
               <label className="cursor-pointer">
                 <input
                   type="file"
@@ -143,7 +151,7 @@ const SettingsPage = () => {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-                <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                <Upload className="mx-auto h-8 w-8 text-milk-500 mb-2" />
                 <p className="text-sm text-gray-600 mb-1">
                   {importFile ? importFile.name : "Click to select a file"}
                 </p>
@@ -156,7 +164,11 @@ const SettingsPage = () => {
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleImportData} disabled={!importFile}>
+              <Button 
+                onClick={handleImportData} 
+                disabled={!importFile}
+                className="bg-milk-500 hover:bg-milk-600"
+              >
                 Import
               </Button>
             </div>

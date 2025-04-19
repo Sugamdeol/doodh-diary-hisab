@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -68,6 +69,8 @@ interface MilkEntryFormProps {
 
 const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
+  const [defaultRate, setDefaultRate] = useState(50);
+  const [defaultVendorId, setDefaultVendorId] = useState("");
 
   // Create form with default values or existing entry values
   const form = useForm<FormValues>({
@@ -84,8 +87,8 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
       : {
           date: new Date(),
           quantity: 1,
-          rate: 50,
-          vendorId: "",
+          rate: defaultRate,
+          vendorId: defaultVendorId,
           isPaid: false,
           notes: "",
         },
@@ -96,13 +99,18 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
     const loadedVendors = getVendors();
     setVendors(loadedVendors);
 
-    // Apply monthly settings if it's a new entry
     if (!entry) {
+      // Apply monthly settings for new entries
       const today = new Date();
       const monthYearString = getMonthYearString(today);
       const settings = getMonthlySettingByMonth(monthYearString);
 
       if (settings) {
+        // Save the default rate and vendorId to state for future use
+        setDefaultRate(settings.defaultRate);
+        setDefaultVendorId(settings.defaultVendorId);
+        
+        // Update the form with the settings
         form.setValue("rate", settings.defaultRate);
         form.setValue("vendorId", settings.defaultVendorId);
       }
@@ -112,7 +120,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
   function onSubmit(data: FormValues) {
     const newEntry: MilkEntry = {
       id: entry?.id || generateId(),
-      date: data.date.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      date: format(data.date, 'yyyy-MM-dd'), // Ensure proper date format
       quantity: data.quantity,
       rate: data.rate,
       vendorId: data.vendorId,
@@ -127,16 +135,29 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
     
     // Reset form if it's a new entry
     if (!entry) {
-      // Only reset certain fields, keep the date, rate and vendor
-      form.setValue("quantity", 1);
-      form.setValue("isPaid", false);
-      form.setValue("notes", "");
+      // Preserve the current date, but reset other fields
+      const currentDate = form.getValues("date");
+      form.reset({
+        date: currentDate,
+        quantity: 1,
+        rate: defaultRate, // Use stored default rate
+        vendorId: defaultVendorId, // Use stored default vendor
+        isPaid: false,
+        notes: "",
+      });
     }
     
     if (onSaved) {
       onSaved(newEntry);
     }
   }
+
+  // Function to handle date selection explicitly
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      form.setValue("date", date);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -153,7 +174,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
+                        "w-full pl-3 text-left font-normal shadow-sm border-milk-100 hover:bg-milk-50",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -170,9 +191,9 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
                   <Calendar
                     mode="single"
                     selected={field.value}
-                    onSelect={field.onChange}
+                    onSelect={handleDateChange}
                     initialFocus
-                    className="p-3 pointer-events-auto"
+                    className="p-3 pointer-events-auto rounded-md border border-milk-100"
                   />
                 </PopoverContent>
               </Popover>
@@ -194,7 +215,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
                     step="0.1"
                     placeholder="1.0"
                     {...field}
-                    className="input-focus"
+                    className="input-focus shadow-sm border-milk-100 focus-visible:ring-milk-500"
                   />
                 </FormControl>
                 <FormMessage />
@@ -213,7 +234,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
                     type="number"
                     placeholder="50"
                     {...field}
-                    className="input-focus"
+                    className="input-focus shadow-sm border-milk-100 focus-visible:ring-milk-500"
                   />
                 </FormControl>
                 <FormMessage />
@@ -228,9 +249,9 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Vendor</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="shadow-sm border-milk-100 focus-visible:ring-milk-500">
                     <SelectValue placeholder="Select a vendor" />
                   </SelectTrigger>
                 </FormControl>
@@ -257,11 +278,12 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
           control={form.control}
           name="isPaid"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
+            <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border border-milk-100 p-4 shadow-sm">
               <FormControl>
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  className="data-[state=checked]:bg-milk-500 data-[state=checked]:border-milk-500"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
@@ -283,7 +305,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
               <FormControl>
                 <Textarea
                   placeholder="e.g., Extra milk, watery milk, etc."
-                  className="resize-none input-focus"
+                  className="resize-none input-focus shadow-sm border-milk-100 focus-visible:ring-milk-500"
                   {...field}
                 />
               </FormControl>
@@ -292,7 +314,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
           )}
         />
 
-        <Button type="submit" className="w-full bg-milk-500 hover:bg-milk-600">
+        <Button type="submit" className="w-full bg-milk-500 hover:bg-milk-600 shadow-md">
           <Milk className="mr-2 h-4 w-4" />
           {entry ? "Update Entry" : "Add Entry"}
         </Button>

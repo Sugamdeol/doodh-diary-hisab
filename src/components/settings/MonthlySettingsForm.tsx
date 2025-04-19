@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, SaveAll } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -51,26 +51,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 const MonthlySettingsForm = () => {
   const [vendors, setVendors] = useState<{ id: string; name: string }[]>([]);
-  const [date, setDate] = useState<Date>(new Date());
-
-  useEffect(() => {
-    const loadedVendors = getVendors();
-    setVendors(loadedVendors.map(v => ({ id: v.id, name: v.name })));
-    
-    // Load existing settings for current month if any
-    const currentMonthYear = getCurrentMonthYear();
-    const settings = getMonthlySettingByMonth(currentMonthYear);
-    
-    if (settings) {
-      const [year, month] = settings.month.split('-').map(Number);
-      form.reset({
-        month: new Date(year, month - 1, 1),
-        defaultRate: settings.defaultRate,
-        defaultVendorId: settings.defaultVendorId,
-      });
-    }
-  }, []);
-
+  
+  // Form with resolver
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -79,6 +61,34 @@ const MonthlySettingsForm = () => {
       defaultVendorId: "",
     },
   });
+
+  // Load data on component mount
+  useEffect(() => {
+    const loadedVendors = getVendors();
+    setVendors(loadedVendors.map(v => ({ id: v.id, name: v.name })));
+    
+    // Load existing settings for current month
+    const currentMonthYear = getCurrentMonthYear();
+    const settings = getMonthlySettingByMonth(currentMonthYear);
+    
+    if (settings) {
+      try {
+        const [year, month] = settings.month.split('-').map(Number);
+        const settingsDate = new Date(year, month - 1, 1);
+        
+        // Reset form with current settings
+        form.reset({
+          month: settingsDate,
+          defaultRate: settings.defaultRate,
+          defaultVendorId: settings.defaultVendorId,
+        });
+        
+        console.log("Loaded settings:", settings);
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    }
+  }, [form]);
 
   function onSubmit(data: FormValues) {
     const monthYearString = getMonthYearString(data.month);
@@ -94,6 +104,7 @@ const MonthlySettingsForm = () => {
     };
 
     saveMonthlySettings(settings);
+    console.log("Saved settings:", settings);
     toast.success("Monthly settings saved successfully");
   }
 
@@ -112,7 +123,7 @@ const MonthlySettingsForm = () => {
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "w-full pl-3 text-left font-normal",
+                        "w-full pl-3 text-left font-normal shadow-sm border-milk-100 hover:bg-milk-50",
                         !field.value && "text-muted-foreground"
                       )}
                     >
@@ -158,7 +169,7 @@ const MonthlySettingsForm = () => {
                   type="number"
                   placeholder="Enter rate"
                   {...field}
-                  className="input-focus"
+                  className="input-focus shadow-sm border-milk-100 focus-visible:ring-milk-500"
                 />
               </FormControl>
               <FormDescription>
@@ -177,10 +188,10 @@ const MonthlySettingsForm = () => {
               <FormLabel>Default Vendor</FormLabel>
               <Select
                 onValueChange={field.onChange}
-                defaultValue={field.value}
+                value={field.value}
               >
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger className="shadow-sm border-milk-100 focus-visible:ring-milk-500">
                     <SelectValue placeholder="Select a vendor" />
                   </SelectTrigger>
                 </FormControl>
@@ -206,7 +217,8 @@ const MonthlySettingsForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full bg-milk-500 hover:bg-milk-600">
+        <Button type="submit" className="w-full bg-milk-500 hover:bg-milk-600 shadow-md">
+          <SaveAll className="mr-2 h-4 w-4" />
           Save Settings
         </Button>
       </form>

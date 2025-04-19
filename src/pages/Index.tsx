@@ -1,12 +1,11 @@
 
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import NavBar from "@/components/layout/NavBar";
 import HomePage from "./HomePage";
 import EntriesPage from "./EntriesPage";
 import VendorsPage from "./VendorsPage";
 import ReportsPage from "./ReportsPage";
 import SettingsPage from "./SettingsPage";
-import { useLocation } from "react-router-dom";
 
 const AppContent = () => {
   const location = useLocation();
