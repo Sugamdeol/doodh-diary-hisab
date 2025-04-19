@@ -72,26 +72,17 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
   const [defaultRate, setDefaultRate] = useState(50);
   const [defaultVendorId, setDefaultVendorId] = useState("");
 
-  // Create form with default values or existing entry values
+  // Create form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: entry
-      ? {
-          date: new Date(entry.date),
-          quantity: entry.quantity,
-          rate: entry.rate,
-          vendorId: entry.vendorId,
-          isPaid: entry.isPaid,
-          notes: entry.notes || "",
-        }
-      : {
-          date: new Date(),
-          quantity: 1,
-          rate: defaultRate,
-          vendorId: defaultVendorId,
-          isPaid: false,
-          notes: "",
-        },
+    defaultValues: {
+      date: new Date(),
+      quantity: 1,
+      rate: 50,
+      vendorId: "",
+      isPaid: false,
+      notes: "",
+    },
   });
 
   // Load vendors and apply monthly settings for new entries
@@ -99,21 +90,37 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
     const loadedVendors = getVendors();
     setVendors(loadedVendors);
 
+    // Apply monthly settings and initialize the form
     if (!entry) {
-      // Apply monthly settings for new entries
       const today = new Date();
       const monthYearString = getMonthYearString(today);
       const settings = getMonthlySettingByMonth(monthYearString);
 
+      // Store defaults for future resets
       if (settings) {
-        // Save the default rate and vendorId to state for future use
         setDefaultRate(settings.defaultRate);
         setDefaultVendorId(settings.defaultVendorId);
-        
-        // Update the form with the settings
-        form.setValue("rate", settings.defaultRate);
-        form.setValue("vendorId", settings.defaultVendorId);
       }
+
+      // Initialize form with defaults or existing entry
+      form.reset({
+        date: new Date(),
+        quantity: 1,
+        rate: settings?.defaultRate || 50,
+        vendorId: settings?.defaultVendorId || "",
+        isPaid: false,
+        notes: "",
+      });
+    } else {
+      // For existing entry
+      form.reset({
+        date: new Date(entry.date),
+        quantity: entry.quantity,
+        rate: entry.rate,
+        vendorId: entry.vendorId,
+        isPaid: entry.isPaid,
+        notes: entry.notes || "",
+      });
     }
   }, [entry, form]);
 
