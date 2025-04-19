@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,24 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom milk theme colors
+				milk: {
+					50: '#f8fafc',
+					100: '#f1f5f9',
+					200: '#e2f8ea',
+					300: '#c5ebd4',
+					400: '#86d6a2',
+					500: '#4CAF50',
+					600: '#3d9240',
+					700: '#2e7031',
+					800: '#1e4620',
+					900: '#0f2310',
+				},
+				alert: {
+					amber: '#FFC107',
+					red: '#F44336',
+					green: '#4CAF50',
 				}
 			},
 			borderRadius: {
@@ -84,11 +103,21 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' }
+				},
+				'bounce-small': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-5px)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'fade-in': 'fade-in 0.5s ease-out',
+				'bounce-small': 'bounce-small 2s ease-in-out infinite'
 			}
 		}
 	},

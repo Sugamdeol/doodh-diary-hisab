@@ -1,14 +1,43 @@
-// Update this page (the content is just a fallback if you fail to update the page)
 
-const Index = () => {
+import { BrowserRouter as Router } from "react-router-dom";
+import NavBar from "@/components/layout/NavBar";
+import HomePage from "./HomePage";
+import EntriesPage from "./EntriesPage";
+import VendorsPage from "./VendorsPage";
+import ReportsPage from "./ReportsPage";
+import SettingsPage from "./SettingsPage";
+import { useLocation } from "react-router-dom";
+
+const AppContent = () => {
+  const location = useLocation();
+  
+  // Render the appropriate component based on the current route
+  const renderContent = () => {
+    const path = location.pathname;
+    
+    if (path === "/entries") {
+      return <EntriesPage />;
+    } else if (path === "/vendors") {
+      return <VendorsPage />;
+    } else if (path === "/reports") {
+      return <ReportsPage />;
+    } else if (path === "/settings") {
+      return <SettingsPage />;
+    } else {
+      return <HomePage />;
+    }
+  };
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      {renderContent()}
+      <NavBar />
     </div>
   );
+};
+
+const Index = () => {
+  return <AppContent />;
 };
 
 export default Index;
