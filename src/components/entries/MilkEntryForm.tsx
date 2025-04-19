@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -70,46 +71,55 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [defaultRate, setDefaultRate] = useState(50);
   const [defaultVendorId, setDefaultVendorId] = useState("");
+  const [formInitialized, setFormInitialized] = useState(false);
 
-  // Create form
+  // Create form with placeholder values
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: new Date(),
       quantity: 1,
-      rate: defaultRate,
-      vendorId: defaultVendorId,
+      rate: 50,
+      vendorId: "",
       isPaid: false,
       notes: "",
     },
   });
 
-  // Load vendors and apply monthly settings for new entries
+  // Load vendors and monthly settings
   useEffect(() => {
+    // Load vendors first
     const loadedVendors = getVendors();
     setVendors(loadedVendors);
-
-    // Apply monthly settings and initialize the form
-    if (!entry) {
+    
+    // For new entries, load the monthly settings
+    if (!entry && !formInitialized) {
       const today = new Date();
       const monthYearString = getMonthYearString(today);
       const settings = getMonthlySettingByMonth(monthYearString);
-
+      
+      console.log("Loading monthly settings:", settings);
+      
       if (settings) {
+        // Store default values
         setDefaultRate(settings.defaultRate);
         setDefaultVendorId(settings.defaultVendorId);
         
-        // Initialize form with default values from settings
+        // Reset form with default values from settings
         form.reset({
           date: new Date(),
           quantity: 1,
           rate: settings.defaultRate,
-          vendorId: settings.defaultVendorId,
+          vendorId: settings.defaultVendorId || "",  // Ensure it's not undefined
           isPaid: false,
           notes: "",
         });
+        
+        console.log("Applied default vendor ID:", settings.defaultVendorId);
       }
-    } else {
+      
+      setFormInitialized(true);
+    } else if (entry) {
       // For existing entry
       form.reset({
         date: new Date(entry.date),
@@ -120,7 +130,7 @@ const MilkEntryForm = ({ entry, onSaved }: MilkEntryFormProps) => {
         notes: entry.notes || "",
       });
     }
-  }, [entry, form]);
+  }, [entry, form, formInitialized]);
 
   function onSubmit(data: FormValues) {
     const newEntry: MilkEntry = {

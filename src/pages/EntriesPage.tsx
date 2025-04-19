@@ -47,7 +47,6 @@ const EntriesPage = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<MilkEntry | null>(null);
 
-  // Load data
   useEffect(() => {
     loadData();
   }, [monthView]);
@@ -56,7 +55,6 @@ const EntriesPage = () => {
     const allEntries = getMilkEntries();
     const [year, month] = monthView.split('-').map(Number);
     
-    // Filter entries for selected month
     const start = startOfMonth(new Date(year, month - 1));
     const end = endOfMonth(new Date(year, month - 1));
     
@@ -67,13 +65,14 @@ const EntriesPage = () => {
     
     setEntries(filteredEntries);
     
-    // Load vendors for lookup
     const loadedVendors = getVendors();
     const vendorMap: Record<string, Vendor> = {};
     loadedVendors.forEach((vendor) => {
       vendorMap[vendor.id] = vendor;
     });
     setVendors(vendorMap);
+    
+    console.log("Loaded vendors:", loadedVendors);
   };
 
   const handleAddEntry = () => {
@@ -106,7 +105,6 @@ const EntriesPage = () => {
     setShowEditDialog(false);
   };
 
-  // Group entries by date for easier rendering
   const entriesByDate: Record<string, MilkEntry[]> = {};
   entries.forEach((entry) => {
     if (!entriesByDate[entry.date]) {
@@ -115,14 +113,12 @@ const EntriesPage = () => {
     entriesByDate[entry.date].push(entry);
   });
 
-  // Get all days in the month
   const [year, month] = monthView.split('-').map(Number);
   const daysInMonth = eachDayOfInterval({
     start: startOfMonth(new Date(year, month - 1)),
     end: endOfMonth(new Date(year, month - 1))
   });
 
-  // Calendar day render function
   const dayRenderer = (date: Date) => {
     const day = date.getDate();
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -148,7 +144,6 @@ const EntriesPage = () => {
         </Button>
       </div>
       
-      {/* Month Selector */}
       <div className="mb-4">
         <Popover>
           <PopoverTrigger asChild>
@@ -173,7 +168,6 @@ const EntriesPage = () => {
         </Popover>
       </div>
       
-      {/* Calendar View */}
       <div className="card-milk mb-4">
         <Calendar
           mode="single"
@@ -196,7 +190,6 @@ const EntriesPage = () => {
         />
       </div>
       
-      {/* Entries Table */}
       <div className="card-milk overflow-hidden">
         <div className="p-3 border-b border-gray-100 bg-gray-50">
           <h2 className="font-medium">Entries for {format(new Date(year, month - 1), 'MMMM yyyy')}</h2>
@@ -235,7 +228,7 @@ const EntriesPage = () => {
                         <TableCell>{formatCurrency(entry.quantity * entry.rate)}</TableCell>
                         <TableCell>
                           {vendors[entry.vendorId]?.name || (
-                            <span className="text-yellow-600 text-sm">
+                            <span className="text-yellow-600 text-sm font-medium">
                               Please select a vendor
                             </span>
                           )}
@@ -292,7 +285,6 @@ const EntriesPage = () => {
         )}
       </div>
       
-      {/* Add Entry Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -305,7 +297,6 @@ const EntriesPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Edit Entry Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -320,7 +311,6 @@ const EntriesPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
